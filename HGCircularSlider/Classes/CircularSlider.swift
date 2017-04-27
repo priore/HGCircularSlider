@@ -48,6 +48,20 @@ open class CircularSlider: UIControl {
     open var trackColor: UIColor = .white
     
     /**
+     * The gradient start color shown for the selected track portion. (between start and end values)
+     * The default value of this property is the red color.
+     */
+    @IBInspectable
+    open var gradientStartColor: UIColor! = nil
+    
+    /**
+     * The gradient end color shown for the selected track portion. (between start and end values)
+     * The default value of this property is the yellow color.
+     */
+    @IBInspectable
+    open var gradientEndColor: UIColor! = nil
+    
+    /**
      * The width of the circular line
      *
      * The default value of this property is 5.0.

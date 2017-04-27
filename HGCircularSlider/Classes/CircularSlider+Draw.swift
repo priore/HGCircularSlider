@@ -20,7 +20,13 @@ extension CircularSlider {
      - parameter context:       the context
      
      */
-    internal static func drawArc(withArc arc: Arc, lineWidth: CGFloat = 2, mode: CGPathDrawingMode = .fillStroke, inContext context: CGContext) {
+    internal static func drawArc(withArc arc: Arc, lineWidth: CGFloat = 2, mode: CGPathDrawingMode = .fillStroke,
+                                 inContext context: CGContext) {
+        CircularSlider.drawGredientArc(withArc: arc, lineWidth: lineWidth, mode: .stroke, inContext: context, gradient: nil)
+    }
+    
+    
+    internal static func drawGredientArc(withArc arc: Arc, lineWidth: CGFloat = 2, mode: CGPathDrawingMode = .fillStroke, inContext context: CGContext, gradient: CFArray!) {
         
         let circle = arc.circle
         let origin = circle.origin
@@ -32,6 +38,21 @@ extension CircularSlider {
         context.setLineCap(CGLineCap.round)
         context.addArc(center: origin, radius: circle.radius, startAngle: arc.startAngle, endAngle: arc.endAngle, clockwise: false)
         context.move(to: CGPoint(x: origin.x, y: origin.y))
+        
+        if (mode == .stroke && gradient != nil) {
+            context.replacePathWithStrokedPath()
+            context.clip()
+            
+            let gradient = CGGradient.init(colorsSpace: CGColorSpaceCreateDeviceRGB(),
+                                           colors: gradient,
+                                           locations: [0.25, 0.75])
+            context.drawLinearGradient(gradient!,
+                                       start: CGPoint.init(x: origin.x * 2, y: origin.y),
+                                       end: CGPoint.init(x: 0, y: origin.y),
+                                       options: CGGradientDrawingOptions(rawValue: 0))
+            
+        }
+        
         context.drawPath(using: mode)
         
         UIGraphicsPopContext()
@@ -79,10 +100,15 @@ extension CircularSlider {
         let circle = Circle(origin: bounds.center, radius: self.radius)
         let arc = Arc(circle: circle, startAngle: startAngle, endAngle: endAngle)
         
+        var gradient: CFArray! = nil
+        if (gradientStartColor != nil && gradientEndColor != nil) {
+            gradient = [gradientStartColor.cgColor, gradientEndColor.cgColor] as CFArray
+        }
+        
         // fill Arc
         CircularSlider.drawDisk(withArc: arc, inContext: context)
         // stroke Arc
-        CircularSlider.drawArc(withArc: arc, lineWidth: lineWidth, mode: .stroke, inContext: context)
+        CircularSlider.drawGredientArc(withArc: arc, lineWidth: lineWidth, mode: .stroke, inContext: context, gradient: gradient)
     }
 
     internal func drawShadowArc(fromAngle startAngle: CGFloat, toAngle endAngle: CGFloat, inContext context: CGContext) {
